@@ -6,7 +6,27 @@ DataDf <- read.table("Group_Assignment_Dataset.txt", header = T, sep = ",")
 
 library(ggplot2)
 
+# Assuming 'data' is your data frame and it contains several columns with NAs
 
+# Applying linear interpolation for each column
+data_interp <- DataDf  # Create a copy of the data to store interpolated values
+
+# Loop over each column in the data frame
+for(i in 1:ncol(DataDf)) {
+  # Check if the column has any missing values
+  if(any(is.na(DataDf[[i]]))) {
+    # Get the indices of non-missing values
+    good_data <- na.omit(DataDf[[i]])
+    # Interpolate missing values using the good data
+    data_interp[[i]] <- approx(good_data, xout = seq_along(DataDf[[i]]))$y
+  }
+}
+
+# Now, data_interp contains the data with interpolated values
+data_interp[168502,]
+
+
+###############################################
 # the date formatted as "DD/MM/YYYY"
 
 DataDf$Date <- as.POSIXlt(DataDf$Date, format = "%d/%m/%Y")
