@@ -23,9 +23,32 @@ for(i in 1:ncol(DataDf)) {
 }
 
 # Now, data_interp contains the data with interpolated values
+options(digits=15)
 data_interp[168502,]
+DataDf[168502,]
 
+#approxm(data1, n, method = "linear")
+library(dplyr)
+library(zoo)
+df <- DataDf
+#interpolate missing values in 'sales' column
+df <- df %>%
+   mutate(Global_reactive_power = na.approx(Global_reactive_power))
+df <- df %>%
+  mutate(Voltage  = na.approx(Voltage ))
+df <- df %>%
+   mutate(Global_intensity = na.approx(Global_intensity))
+df <- df %>%
+   mutate(Sub_metering_1  = na.approx(Sub_metering_1 ))
+df <- df %>%
+   mutate(Sub_metering_2  = na.approx(Sub_metering_2 ))
+df <- df %>%
+   mutate(Sub_metering_3  = na.approx(Sub_metering_3 ))
+#view updated data frame
 
+df[168502,]
+data_interp[168502,]
+DataDf[168502,]
 ###############################################
 # the date formatted as "DD/MM/YYYY"
 
