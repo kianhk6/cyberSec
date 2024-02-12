@@ -62,17 +62,18 @@ end_date <- as.POSIXlt("2007-02-11") # end date of the 6th week
 week_data <- DataDf[DataDf$Date >= start_date & DataDf$Date <= end_date, ]
 ################################################
 
-ggplot()+layer(data = DataDf, mapping = aes(x=Time, y=Voltage), geom = "point",stat="identity", position = position_identity())
+ggplot()+layer(data = df, mapping = aes(x=Time, y=Voltage), geom = "point",stat="identity", position = position_identity())
+
 
 ###############################################
 
 ggplot()+
-  layer(data = DataDf, mapping = aes(x=Date, y=Voltage), geom = "point",stat="identity", position = position_identity())
+  layer(data = df, mapping = aes(x=Date, y=Voltage), geom = "point",stat="identity", position = position_identity())
 
 ###############################################
 
 ggplot()+
-  layer(data = DataDf, mapping = aes(x=Date, y=Voltage), geom = "point",stat="identity", position = position_jitter(width = 0.3, height = 0)) +
+  layer(data = df, mapping = aes(x=Date, y=Voltage), geom = "point",stat="identity", position = position_jitter(width = 0.3, height = 0)) +
   coord_cartesian() +
   scale_x_discrete() +
   scale_y_continuous()
@@ -80,8 +81,8 @@ ggplot()+
 ###############################################
 
 ggplot()+
-  layer(data = DataDf, mapping = aes(x=Date, y=Voltage), geom = "point",stat="identity", position = position_jitter(width = 0.3, height = 0)) +
-  layer(data = DataDf, mapping = aes(x=Date, y=Voltage), geom = "boxplot" ,stat="boxplot", position = position_identity()) +
+  layer(data = df, mapping = aes(x=Date, y=Voltage), geom = "point",stat="identity", position = position_jitter(width = 0.3, height = 0)) +
+  layer(data = df, mapping = aes(x=Date, y=Voltage), geom = "boxplot" ,stat="boxplot", position = position_identity()) +
   coord_cartesian() +
   scale_x_discrete() +
   scale_y_continuous()
@@ -89,7 +90,7 @@ ggplot()+
 ###############################################
 
 ggplot()+
-  layer(data = DataDf, mapping = aes(x=Time, y=Voltage, color = Date), geom = "point",stat="identity", position = position_identity()) +
+  layer(data = df, mapping = aes(x=Time, y=Voltage, color = Date), geom = "point",stat="identity", position = position_identity()) +
   coord_cartesian() +
   scale_x_discrete() +
   scale_y_continuous() +
@@ -98,7 +99,7 @@ ggplot()+
 ###############################################
 
 ggplot()+
-  layer(data = DataDf, mapping = aes(x=Time, y=Voltage, color = Global_intensity), geom = "point",stat="identity", position = position_identity()) +
+  layer(data = df, mapping = aes(x=Time, y=Voltage, color = Global_intensity), geom = "point",stat="identity", position = position_identity()) +
   coord_cartesian() +
   scale_x_discrete() +
   scale_y_continuous() +
@@ -108,7 +109,7 @@ ggplot()+
 ###############################################
 
 ggplot()+
-  layer(data = DataDf, mapping = aes(x=Time, y=Voltage, color = Global_intensity), geom = "point",stat="identity", position = position_identity()) +
+  layer(data = df, mapping = aes(x=Time, y=Voltage, color = Global_intensity), geom = "point",stat="identity", position = position_identity()) +
   coord_cartesian() +
   scale_x_discrete() +
   scale_y_continuous() +
