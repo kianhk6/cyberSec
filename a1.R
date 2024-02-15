@@ -1,0 +1,139 @@
+# Load necessary libraries
+library("dplyr")
+library("car")
+library("forcats")
+library("ggplot2")
+library("gplots")
+library("effects")
+library("lubridate")
+library("tidyverse")
+
+source(choose.files())
+
+data <- read.csv(choose.files())
+
+#summary of data 
+summary(data)
+
+
+# Assign column names to the data frame
+names(data) <- c('Date', 'Time', 'Global_active_power', 'Global_reactive_power', 'Voltage', 
+                 'Global_intensity', 'Sub_metering_1', 'Sub_metering_2', 'Sub_metering_3')
+
+
+# Proceed with the rest of your code for filtering and analysis
+data$Date <- as.POSIXlt(data$Date, format = "%d/%m/%Y")
+
+# Determine the range of dates for the 6th week in the form "YYYY-MM-DD"
+start_date <- as.POSIXlt("2007-02-05") # start date of the 6th week
+end_date <- as.POSIXlt("2007-02-11") # end date of the 6th week
+
+# Subset the data for the 6th week
+week_data <- data[data$Date >= start_date & data$Date <= end_date, ]
+
+#format the time
+data$Time <- format(strptime(data$Time, format = "%H:%M:%S"), "%H:%M")
+
+
+
+#getting windows of weekday and weekends, day time and night time-------------------
+#convert the week_data's time format
+week_data$Time <- format(strptime(week_data$Time, format = "%H:%M:%S"), "%H:%M")
+
+#get the daytime during weekdays
+daytime_weekdays <- subset(week_data, as.integer(format(week_data$Date, "%u")) %in% 1:5 & 
+                             (Time >= "07:30" & Time <= "17:00"))
+
+#get average night time weekday day time 
+nighttime_weekdays <- subset(week_data, as.integer(format(week_data$Date, "%u")) %in% 1:5 & 
+                               (Time > "17:00" | Time < "07:30"))
+
+#get the time during weekdays
+daytime_weekends <- subset(week_data, as.integer(format(week_data$Date, "%u")) %in% c(6, 7) & 
+                             (Time >= "07:30" & Time <= "17:00"))
+
+#get nighttime weekends
+nighttime_weekends <- subset(week_data, as.integer(format(week_data$Date, "%u")) %in% c(6, 7) & 
+                               (Time > "17:00" | Time < "07:30"))
+
+
+#getting averages -----------------------------
+
+#get the average of weekday day time and global intensity
+average_daytime_weekdays <- aggregate(Global_intensity ~ Time, daytime_weekdays, mean)
+
+#get the average of weekday day time and global intensity
+average_nighttime_weekdays <- aggregate(Global_intensity ~ Time, nighttime_weekdays, mean)
+
+#get the average of weekend day time and global intensity
+average_daytime_weekends <- aggregate(Global_intensity ~ Time, daytime_weekends, mean)
+
+#get the average of weekday day time and global intensity
+average_nighttime_weekends <- aggregate(Global_intensity ~ Time, nighttime_weekends, mean)
+
+# Function to convert HH:MM into numeric hours
+convert_to_hours <- function(t) {
+  hms <- strsplit(t, ":")[[1]]
+  hour <- as.numeric(hms[1])
+  minute <- as.numeric(hms[2])
+  hour_decimal <- hour + minute/60
+  if(hour_decimal < 8) {
+    hour_decimal <- hour_decimal - 24
+  }
+  return(hour_decimal)
+}
+
+# Apply the function and adjust AM times
+adjust_hours <- function(hours) {
+  if (hours < 8) return(hours + 24) else return(hours)
+}
+
+#convert into numeric hours
+average_daytime_weekdays$Time_hours <- sapply(average_daytime_weekdays$Time, convert_to_hours)
+average_daytime_weekdays$Time_hours <- sapply(average_daytime_weekdays$Time_hours, adjust_hours)
+
+average_daytime_weekends$Time_hours <- sapply(average_daytime_weekends$Time, convert_to_hours)
+average_daytime_weekends$Time_hours <- sapply(average_daytime_weekends$Time_hours, adjust_hours)
+
+average_nighttime_weekdays$Time_hours <- sapply(average_nighttime_weekdays$Time, convert_to_hours)
+average_nighttime_weekdays$Time_hours <- sapply(average_nighttime_weekdays$Time_hours, adjust_hours)
+
+average_nighttime_weekends$Time_hours <- sapply(average_nighttime_weekends$Time, convert_to_hours)
+average_nighttime_weekends$Time_hours <- sapply(average_nighttime_weekends$Time_hours, adjust_hours)
+
+#plot data cleaning 0--------------------------------------------------------
+# Convert Time to numeric for plot purposes
+average_daytime_weekdays$Time_posix <- as.POSIXct(average_daytime_weekdays$Time, format="%H:%M")
+average_daytime_weekdays$Time_numeric <- as.numeric(difftime(average_daytime_weekdays$Time_posix, min(average_daytime_weekdays$Time_posix), units = "mins"))
+
+average_daytime_weekends$Time_posix <- as.POSIXct(average_daytime_weekends$Time, format="%H:%M")
+average_daytime_weekends$Time_numeric <- as.numeric(difftime(average_daytime_weekends$Time_posix, min(average_daytime_weekends$Time_posix), units = "mins"))
+
+average_nighttime_weekdays$Time_posix <- as.POSIXct(average_nighttime_weekdays$Time, format="%H:%M")
+average_nighttime_weekdays$Time_numeric <- as.numeric(difftime(average_nighttime_weekdays$Time_posix, min(average_nighttime_weekdays$Time_posix), units = "mins"))
+
+average_nighttime_weekends$Time_posix <- as.POSIXct(average_nighttime_weekends$Time, format="%H:%M")
+average_nighttime_weekends$Time_numeric <- as.numeric(difftime(average_nighttime_weekends$Time_posix, min(average_nighttime_weekends$Time_posix), units = "mins"))
+
+#
+# Combine night data
+all_night_data <- rbind(average_nighttime_weekdays, average_nighttime_weekends)
+
+# Adjust hours using our function
+all_night_data$Time_hours <- sapply(all_night_data$Time, convert_to_hours)
+
+# Split the night data back into weekday and weekend for plotting
+weekday_night_data <- all_night_data %>% filter(Time <= "07:59:59")
+weekend_night_data <- all_night_data %>% filter(Time > "07:59:59")
+
+weekday_day_average$Time_hours <- sapply(weekday_day_average$Time, convert_to_hours)
+weekend_day_average$Time_hours <- sapply(weekend_day_average$Time, convert_to_hours)
+
+
+#linear cleaning ----------------------------------------------------------
+daytime_weekday_linear <- lm(Global_intensity ~ Time_hours, average_daytime_weekdays)
+plot(Global_intensity ~ Time_hours, average_daytime_weekdays)
+ 
+
+
+
