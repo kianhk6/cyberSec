@@ -119,15 +119,6 @@ average_nighttime_weekends$Time_numeric <- as.numeric(difftime(average_nighttime
 # Combine night data
 all_night_data <- rbind(average_nighttime_weekdays, average_nighttime_weekends)
 
-# Adjust hours using our function
-all_night_data$Time_hours <- sapply(all_night_data$Time, convert_to_hours)
-
-# Split the night data back into weekday and weekend for plotting
-weekday_night_data <- all_night_data %>% filter(Time <= "07:59:59")
-weekend_night_data <- all_night_data %>% filter(Time > "07:59:59")
-
-weekday_day_average$Time_hours <- sapply(weekday_day_average$Time, convert_to_hours)
-weekend_day_average$Time_hours <- sapply(weekend_day_average$Time, convert_to_hours)
 
 
 #linear cleaning ----------------------------------------------------------
