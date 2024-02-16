@@ -50,25 +50,40 @@ df[168502,]
 data_interp[168502,]
 DataDf[168502,]
 ###############################################
-
-# For multiple columns, calculate the Z score for each column 
+# Calculation for Z score 
+# For multiple columns, calculate the Z score for each column and the anomalies of each column
 dataf <- df
 columns_to_calculate <- c("Global_reactive_power", "Voltage","Global_intensity", "Sub_metering_1", "Sub_metering_2", "Sub_metering_3") 
 for(column_name in columns_to_calculate) {
   z_score_column_name <- paste(column_name, "Z_score", sep = "_")
   dataf[[z_score_column_name]] <- (dataf[[column_name]] - mean(dataf[[column_name]], na.rm = TRUE)) / sd(dataf[[column_name]], na.rm = TRUE)
-}
-
-# Assuming columns_to_calculate contains the names of the original columns
-# Now, each column has an associated 'anomaly' column indicating point anomalies
-# In the table dataf  TRUE = point anomaly (outliar)
-# In the table dataf  FALSE = not a point anomaly (outliar)
-for(column_name in columns_to_calculate) {
+  
+  # Assuming columns_to_calculate contains the names of the original columns
+  # Now, each column has an associated 'anomaly' column indicating point anomalies
+  # In the table dataf  TRUE = point anomaly (outliar)
+  # In the table dataf  FALSE = not a point anomaly (outliar)
   anomaly_column_name <- paste(column_name, "anomaly", sep = "_")
   dataf[[anomaly_column_name]] <- abs(dataf[[z_score_column_name]]) > 3
 }
+################################################
+# Calculate the percentage of anomalies for each feature
+percentages <- sapply(columns_to_calculate, function(column_name) {
+  anomaly_column_name <- paste(column_name, "anomaly", sep = "_")
+  percentage <- mean(dataf[[anomaly_column_name]] == TRUE, na.rm = TRUE) * 100
+  return(percentage)
+})
 
+# Print the percentages for each feature
+print(percentages)
 
+# Calculate overall percentage of anomalies across all features
+overall_anomaly_flags <- dataf[, grep("anomaly$", names(dataf))]
+dataf$any_anomaly <- rowSums(overall_anomaly_flags == TRUE, na.rm = TRUE) > 0
+overall_percentage <- mean(dataf$any_anomaly, na.rm = TRUE) * 100
+
+# Print the overall percentage of anomalies in the dataset
+print(overall_percentage)
+###########################################################################################
 
 ###############################################
 # the date formatted as "DD/MM/YYYY"
