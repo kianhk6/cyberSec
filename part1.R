@@ -27,11 +27,11 @@ options(digits=15)
 data_interp[168502,]
 DataDf[168502,]
 
-#approxm(data1, n, method = "linear")
+#approx(data_interp, method = "linear")
 library(dplyr)
 library(zoo)
 df <- DataDf
-#interpolate missing values in 'sales' column
+#interpolate missing values in each column
 df <- df %>%
    mutate(Global_reactive_power = na.approx(Global_reactive_power))
 df <- df %>%
@@ -45,10 +45,31 @@ df <- df %>%
 df <- df %>%
    mutate(Sub_metering_3  = na.approx(Sub_metering_3 ))
 #view updated data frame
-
+#checking and comparing the filled in values
 df[168502,]
 data_interp[168502,]
 DataDf[168502,]
+###############################################
+
+# For multiple columns, calculate the Z score for each column 
+dataf <- df
+columns_to_calculate <- c("Global_reactive_power", "Voltage","Global_intensity", "Sub_metering_1", "Sub_metering_2", "Sub_metering_3") 
+for(column_name in columns_to_calculate) {
+  z_score_column_name <- paste(column_name, "Z_score", sep = "_")
+  dataf[[z_score_column_name]] <- (dataf[[column_name]] - mean(dataf[[column_name]], na.rm = TRUE)) / sd(dataf[[column_name]], na.rm = TRUE)
+}
+
+# Assuming columns_to_calculate contains the names of the original columns
+# Now, each column has an associated 'anomaly' column indicating point anomalies
+# In the table dataf  TRUE = point anomaly (outliar)
+# In the table dataf  FALSE = not a point anomaly (outliar)
+for(column_name in columns_to_calculate) {
+  anomaly_column_name <- paste(column_name, "anomaly", sep = "_")
+  dataf[[anomaly_column_name]] <- abs(dataf[[z_score_column_name]]) > 3
+}
+
+
+
 ###############################################
 # the date formatted as "DD/MM/YYYY"
 
