@@ -36,7 +36,16 @@ FG <- cor(data$Sub_metering_2, data$Sub_metering_3, method = "pearson")
 
 #correlation_matrix <- cor(data, method = "pearson")
 matrix <- round(cor(data[,3:9], method = "pearson", use = "complete.obs"),3)
-ggcorrplot(matrix)
+heatmap <-ggcorrplot(matrix)
+heatmap + 
+  geom_text(aes(Var2, Var1, label = value), color = "black", size = 4) +
+  theme(
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
+    panel.grid.major = element_blank(),
+    panel.border = element_blank(),
+    panel.background = element_blank(),
+    axis.ticks = element_blank())
 head(matrix)
 
 
